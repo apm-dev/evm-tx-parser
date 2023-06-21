@@ -12,14 +12,21 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+func mockDependencies() (
+	*mocks.ParserRepo,
+	*mocks.EthereumClient,
+	*mocks.TransactionRepo,
+	*mocks.AddressRepo,
+) {
+	return new(mocks.ParserRepo),
+		new(mocks.EthereumClient),
+		new(mocks.TransactionRepo),
+		new(mocks.AddressRepo)
+}
+
 func Test_Start(t *testing.T) {
 	config := config.NewConfig()
 	config.App.GetBlocksBatchSize = 3
-
-	mockParserRepo := new(mocks.ParserRepo)
-	mockEthClient := new(mocks.EthereumClient)
-	mockTxRepo := new(mocks.TransactionRepo)
-	mockAddressRepo := new(mocks.AddressRepo)
 
 	noTxGetBlocksResult := []domain.Block{
 		{Number: 101, Hash: "0x101", ParentHash: "0x100"},
@@ -28,6 +35,7 @@ func Test_Start(t *testing.T) {
 	}
 
 	t.Run("should fetch as many blocks as max block batch size config in a batch request, even there are more blocks to fetch", func(t *testing.T) {
+		mockParserRepo, mockEthClient, mockTxRepo, mockAddressRepo := mockDependencies()
 		// Arrange
 		mockParserRepo.On("GetLastParsedBlock").
 			Return(100, "0x100")
@@ -58,6 +66,8 @@ func Test_Start(t *testing.T) {
 
 	t.Run("should sleep and wait when there is no block to fetch", func(t *testing.T) {
 		// Arrange
+		mockParserRepo, mockEthClient, mockTxRepo, mockAddressRepo := mockDependencies()
+
 		mockParserRepo.On("GetLastParsedBlock").
 			Return(100, "0x100")
 		mockEthClient.On("GetNowBlockNumber").
@@ -83,6 +93,8 @@ func Test_Start(t *testing.T) {
 
 	t.Run("should stop parsing when detect orphan blocks", func(t *testing.T) {
 		// Arrange
+		mockParserRepo, mockEthClient, mockTxRepo, mockAddressRepo := mockDependencies()
+
 		getBlocksResultWithOrphan := []domain.Block{
 			{Number: 101, Hash: "0x101", ParentHash: "0x4234123"},
 			{Number: 102, Hash: "0x102", ParentHash: "0x101"},
