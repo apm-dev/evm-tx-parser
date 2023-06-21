@@ -5,7 +5,7 @@ type Address struct {
 	Address string
 }
 
-type AddressRepository interface {
+type AddressRepo interface {
 	Save(address string) (id int, err error)
 	Exist(address string) bool
 }

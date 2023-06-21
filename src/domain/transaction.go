@@ -16,7 +16,7 @@ type Block struct {
 	Transactions []Transaction `json:"transactions"`
 }
 
-type TransactionRepository interface {
+type TransactionRepo interface {
 	SaveMany(txs []Transaction) error
 	FindByAddress(address string) ([]Transaction, error)
 }
