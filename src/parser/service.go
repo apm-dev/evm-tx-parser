@@ -106,7 +106,7 @@ func (s *parser) Start(ctx context.Context) {
 				sort.Sort(blocks)
 				// Stop parsing in case of reorgs (orphan blocks)
 				if s.isThereOrphanBlock(lastBlockNum, lastBlockHash, blocks[0]) {
-					log.Fatalf("detect Orphan blocks on block '%d':'%s'", lastBlockNum, lastBlockHash)
+					log.Errorf("detect Orphan blocks on block '%d':'%s'", lastBlockNum, lastBlockHash)
 					return
 				}
 				// Parse blocks concurrently to extract related transactions
