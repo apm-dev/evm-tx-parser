@@ -3,6 +3,7 @@ module github.com/apm-dev/evm-tx-parser
 go 1.20
 
 require (
+	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.16.0
 )
