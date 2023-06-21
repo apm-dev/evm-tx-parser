@@ -66,7 +66,7 @@ func (s *parser) GetTransactions(address string) []domain.Transaction {
 }
 
 func (s *parser) Start(ctx context.Context) {
-	go s.once.Do(func() {
+	s.once.Do(func() {
 		for {
 			select {
 			case <-ctx.Done():
@@ -93,6 +93,11 @@ func (s *parser) Start(ctx context.Context) {
 				blocksRange, err := s.ethClient.GetBlocksByRange(fromBlock, toBlock)
 				if err != nil {
 					log.Errorf("failed to get blocks '%d -> %d', error '%s'", fromBlock, toBlock, err)
+					s.sleepOneBlockTime()
+					continue
+				}
+				if len(blocksRange) == 0 {
+					log.Warnf("no blocks to parse '%d -> %d'", fromBlock, toBlock)
 					s.sleepOneBlockTime()
 					continue
 				}

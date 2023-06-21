@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/apm-dev/evm-tx-parser/src/domain"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -42,9 +44,9 @@ func (_m *Parser) GetTransactions(address string) []domain.Transaction {
 	return r0
 }
 
-// Start provides a mock function with given fields:
-func (_m *Parser) Start() {
-	_m.Called()
+// Start provides a mock function with given fields: ctx
+func (_m *Parser) Start(ctx context.Context) {
+	_m.Called(ctx)
 }
 
 // Subscribe provides a mock function with given fields: address
