@@ -1,5 +1,7 @@
 package domain
 
+import "context"
+
 type Parser interface {
 	// last parsed block
 	GetCurrentBlock() int
@@ -11,7 +13,7 @@ type Parser interface {
 	GetTransactions(address string) []Transaction
 
 	// start reading the network and parsing blocks
-	Start()
+	Start(ctx context.Context)
 }
 
 type EthereumClient interface {

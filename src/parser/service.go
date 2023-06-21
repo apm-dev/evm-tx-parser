@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"context"
 	"math"
 	"sort"
 	"strings"
@@ -64,62 +65,67 @@ func (s *parser) GetTransactions(address string) []domain.Transaction {
 	return txs
 }
 
-func (s *parser) Start() {
+func (s *parser) Start(ctx context.Context) {
 	go s.once.Do(func() {
 		for {
-			lastBlockNum, lastBlockHash := s.parserRepo.GetLastParsedBlock()
-			currentBlock, err := s.ethClient.GetNowBlockNumber()
-			if err != nil {
-				log.Errorf("failed to get current block, error '%s'", err)
-				s.sleepOneBlockTime()
-				continue
-			}
-			batchSize := s.howManyBlocksShouldFetch(lastBlockNum, currentBlock)
-			if batchSize <= 0 {
-				s.sleepOneBlockTime()
-				continue
-			}
-			// Fetch range of blocks, use batch request to:
-			// Reduced network latency
-			// Improved performance
-			// Atomicity
-			fromBlock := lastBlockNum + 1
-			toBlock := lastBlockNum + batchSize
-			blocksRange, err := s.ethClient.GetBlocksByRange(fromBlock, toBlock)
-			if err != nil {
-				log.Errorf("failed to get blocks '%d -> %d', error '%s'", fromBlock, toBlock, err)
-				s.sleepOneBlockTime()
-				continue
-			}
-			// Sort Blocks by their Number in ASC order
-			blocks := domain.Blocks(blocksRange)
-			sort.Sort(blocks)
-			// Stop parsing in case of reorgs (orphan blocks)
-			if s.isThereOrphanBlock(lastBlockNum, lastBlockHash, blocks[0]) {
-				log.Fatalf("detect Orphan blocks on block '%d':'%s'", lastBlockNum, lastBlockHash)
+			select {
+			case <-ctx.Done():
 				return
-			}
-			// Parse blocks concurrently to extract related transactions
-			relatedTxs := make([]domain.Transaction, 0)
-			resultChan := make(chan []domain.Transaction, len(blocks))
-			for _, block := range blocks {
-				go s.extractRelatedTxs(block, resultChan)
-			}
-			for txs := range resultChan {
-				relatedTxs = append(relatedTxs, txs...)
-			}
-			// Store Txs and update last parsed block
-			// better to do both in one DB (ACID) transaction
-			err = s.txRepo.SaveMany(relatedTxs)
-			if err != nil {
-				log.Errorf("failed to store transactions '%d' of blocks '%d -> %d', error '%s'", len(relatedTxs), fromBlock, toBlock, err)
-				continue
-			}
-			lastBlock := blocks[len(blocks)-1]
-			err = s.parserRepo.UpdateLastParsedBlock(lastBlock.Number, lastBlock.Hash)
-			if err != nil {
-				log.Errorf("failed to update last parsed block '%d':'%s', error '%s'", lastBlock.Number, lastBlock.Hash, err)
-				continue
+			default:
+				lastBlockNum, lastBlockHash := s.parserRepo.GetLastParsedBlock()
+				currentBlock, err := s.ethClient.GetNowBlockNumber()
+				if err != nil {
+					log.Errorf("failed to get current block, error '%s'", err)
+					s.sleepOneBlockTime()
+					continue
+				}
+				batchSize := s.howManyBlocksShouldFetch(lastBlockNum, currentBlock)
+				if batchSize <= 0 {
+					s.sleepOneBlockTime()
+					continue
+				}
+				// Fetch range of blocks, use batch request to:
+				// Reduced network latency
+				// Improved performance
+				// Atomicity
+				fromBlock := lastBlockNum + 1
+				toBlock := lastBlockNum + batchSize
+				blocksRange, err := s.ethClient.GetBlocksByRange(fromBlock, toBlock)
+				if err != nil {
+					log.Errorf("failed to get blocks '%d -> %d', error '%s'", fromBlock, toBlock, err)
+					s.sleepOneBlockTime()
+					continue
+				}
+				// Sort Blocks by their Number in ASC order
+				blocks := domain.Blocks(blocksRange)
+				sort.Sort(blocks)
+				// Stop parsing in case of reorgs (orphan blocks)
+				if s.isThereOrphanBlock(lastBlockNum, lastBlockHash, blocks[0]) {
+					log.Fatalf("detect Orphan blocks on block '%d':'%s'", lastBlockNum, lastBlockHash)
+					return
+				}
+				// Parse blocks concurrently to extract related transactions
+				relatedTxs := make([]domain.Transaction, 0)
+				resultChan := make(chan []domain.Transaction, len(blocks))
+				for _, block := range blocks {
+					go s.extractRelatedTxs(block, resultChan)
+				}
+				for i := 0; i < len(blocks); i++ {
+					relatedTxs = append(relatedTxs, <-resultChan...)
+				}
+				// Store Txs and update last parsed block
+				// better to do both in one DB (ACID) transaction
+				err = s.txRepo.SaveMany(relatedTxs)
+				if err != nil {
+					log.Errorf("failed to store transactions '%d' of blocks '%d -> %d', error '%s'", len(relatedTxs), fromBlock, toBlock, err)
+					continue
+				}
+				lastBlock := blocks[len(blocks)-1]
+				err = s.parserRepo.UpdateLastParsedBlock(lastBlock.Number, lastBlock.Hash)
+				if err != nil {
+					log.Errorf("failed to update last parsed block '%d':'%s', error '%s'", lastBlock.Number, lastBlock.Hash, err)
+					continue
+				}
 			}
 		}
 	})
