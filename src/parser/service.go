@@ -95,7 +95,7 @@ func (s *parser) Start() {
 			blocks := domain.Blocks(blocksRange)
 			sort.Sort(blocks)
 			// Stop parsing in case of reorgs (orphan blocks)
-			if s.isThereOrphanBlock(lastBlockNum, lastBlockHash, blocks) {
+			if s.isThereOrphanBlock(lastBlockNum, lastBlockHash, blocks[0]) {
 				log.Fatalf("detect Orphan blocks on block '%d':'%s'", lastBlockNum, lastBlockHash)
 				return
 			}
@@ -130,7 +130,7 @@ func (s *parser) sleepOneBlockTime() {
 }
 
 func (s *parser) howManyBlocksShouldFetch(lastBlock, currentBlock int) int {
-	// Stay a few blocks behind the networks head to prevent facing with reorgs (orphan blocks)
+	// Stay a few blocks behind the network's head to prevent facing with reorgs (orphan blocks)
 	safeBlock := currentBlock - s.config.App.OrphanPreventionBlockCount
 	diff := safeBlock - lastBlock
 	if diff <= 0 {
@@ -139,8 +139,8 @@ func (s *parser) howManyBlocksShouldFetch(lastBlock, currentBlock int) int {
 	return int(math.Min(float64(diff), float64(s.config.App.GetBlocksBatchSize)))
 }
 
-func (s *parser) isThereOrphanBlock(lastBlockNum int, lastBlockHash string, sortedNewBlocks []domain.Block) bool {
-	return sortedNewBlocks[0].Number == lastBlockNum+1 && sortedNewBlocks[0].ParentHash == lastBlockHash
+func (s *parser) isThereOrphanBlock(lastBlockNum int, lastBlockHash string, nextBlock domain.Block) bool {
+	return nextBlock.Number != lastBlockNum+1 || nextBlock.ParentHash != lastBlockHash
 }
 
 func (s *parser) extractRelatedTxs(b domain.Block, result chan<- []domain.Transaction) {
