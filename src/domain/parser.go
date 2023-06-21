@@ -9,6 +9,9 @@ type Parser interface {
 
 	// list of inbound or outbound transactions for an address
 	GetTransactions(address string) []Transaction
+
+	// start reading the network and parsing blocks
+	Start()
 }
 
 type EthereumClient interface {
