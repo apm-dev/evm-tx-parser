@@ -35,6 +35,10 @@ This Project Implemented Based on Clean Architecture in Golang.
 $ make test
 ```
 
+⚙️ Change Configs
+
+To changes all configurations like starting block, web port, full-node url, etc. open `config.yaml` and modify them as you wish :)
+
 #### 🐳 Run the Applications
 Here is the steps to run it with `docker-compose`
 
