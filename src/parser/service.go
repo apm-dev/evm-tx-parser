@@ -151,7 +151,7 @@ func (s *parser) howManyBlocksShouldFetch(lastBlock, currentBlock int) int {
 }
 
 func (s *parser) isThereOrphanBlock(lastBlockNum int, lastBlockHash string, nextBlock domain.Block) bool {
-	return nextBlock.Number != lastBlockNum+1 || nextBlock.ParentHash != lastBlockHash
+	return nextBlock.Number != lastBlockNum+1 || !strings.EqualFold(nextBlock.ParentHash, lastBlockHash)
 }
 
 func (s *parser) extractRelatedTxs(b domain.Block, result chan<- []domain.Transaction) {
