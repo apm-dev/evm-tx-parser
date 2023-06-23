@@ -48,6 +48,8 @@ type ApplicationConfig struct {
 	DefaultStartingBlockNum  int
 	DefaultStartingBlockHash string
 
+	NodeUrl string
+
 	LogLevel string
 }
 
@@ -61,6 +63,7 @@ func (c *ApplicationConfig) parse() {
 	c.OrphanPreventionBlockCount = viperGetOrDefaultInt("app.orphan-prevention-block-count", 10)
 	c.DefaultStartingBlockNum = viperGetOrDefaultInt("app.default-starting-block-num", 17539747)
 	c.DefaultStartingBlockHash = viperGetOrDefault("app.default-starting-block-hash", "0x206b9c2a16f0774b64b2b682683db378aacdd619b532f391633181b99abb1a41")
+	c.NodeUrl = viperGetOrDefault("app.node-url", "https://rpc.ankr.com/eth")
 	c.LogLevel = viperGetOrDefault("app.log-level", "debug")
 }
 

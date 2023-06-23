@@ -1,0 +1,7 @@
+app:
+  log-level: "debug"
+  web-port: 8000
+  node-url: "https://rpc.ankr.com/eth"
+  get-blocks-batch-size: 5
+  default-starting-block-num: 17539747
+  default-starting-block-hash: "0x206b9c2a16f0774b64b2b682683db378aacdd619b532f391633181b99abb1a41"

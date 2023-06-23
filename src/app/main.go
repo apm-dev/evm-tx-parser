@@ -50,7 +50,7 @@ func main() {
 	txRepo := _txRepo.NewTransactionRepo()
 	parserRepo := _parserRepo.NewParserRepo()
 
-	ethClient := ethclient.NewEthClient(config, "https://rpc.ankr.com/eth")
+	ethClient := ethclient.NewEthClient(config, config.App.NodeUrl)
 
 	// Set parser's starting point (block)
 	err = parserRepo.UpdateLastParsedBlock(config.App.DefaultStartingBlockNum, config.App.DefaultStartingBlockHash)

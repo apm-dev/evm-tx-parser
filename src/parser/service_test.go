@@ -9,6 +9,7 @@ import (
 	"github.com/apm-dev/evm-tx-parser/src/domain"
 	"github.com/apm-dev/evm-tx-parser/src/domain/mocks"
 	"github.com/apm-dev/evm-tx-parser/src/parser"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -27,6 +28,8 @@ func mockDependencies() (
 func Test_Start(t *testing.T) {
 	config := config.NewConfig()
 	config.App.GetBlocksBatchSize = 3
+
+	logrus.SetLevel(logrus.WarnLevel)
 
 	noTxGetBlocksResult := []domain.Block{
 		{Number: 101, Hash: "0x101", ParentHash: "0x100"},
