@@ -47,7 +47,7 @@ func (s *parser) GetCurrentBlock() int {
 
 // add address to observer
 func (s *parser) Subscribe(address string) bool {
-	_, err := s.addressRepo.Save(address)
+	err := s.addressRepo.Save(strings.ToLower(address))
 	if err != nil {
 		log.Errorf("failed to subscribe address '%s', error '%s'", address, err)
 		return false

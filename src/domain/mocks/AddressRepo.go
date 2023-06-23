@@ -24,27 +24,17 @@ func (_m *AddressRepo) Exist(address string) bool {
 }
 
 // Save provides a mock function with given fields: address
-func (_m *AddressRepo) Save(address string) (int, error) {
+func (_m *AddressRepo) Save(address string) error {
 	ret := _m.Called(address)
 
-	var r0 int
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (int, error)); ok {
-		return rf(address)
-	}
-	if rf, ok := ret.Get(0).(func(string) int); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
 		r0 = rf(address)
 	} else {
-		r0 = ret.Get(0).(int)
+		r0 = ret.Error(0)
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(address)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 type mockConstructorTestingTNewAddressRepo interface {
