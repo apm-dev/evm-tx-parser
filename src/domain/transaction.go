@@ -1,13 +1,12 @@
 package domain
 
 type Transaction struct {
-	Hash        string      `json:"hash"`
-	Value       string      `json:"value"`
-	From        string      `json:"from"`
-	To          string      `json:"to"`
-	Nonce       int         `json:"nonce"`
-	BlockNumber int         `json:"block_number"`
-	Direction   TxDirection `json:"direction,omitempty"`
+	Hash        string `json:"hash"`
+	Value       string `json:"value"`
+	From        string `json:"from"`
+	To          string `json:"to"`
+	Nonce       int    `json:"nonce"`
+	BlockNumber int    `json:"block_number"`
 }
 
 type TxDirection string

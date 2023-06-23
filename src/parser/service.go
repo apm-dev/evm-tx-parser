@@ -47,7 +47,7 @@ func (s *parser) GetCurrentBlock() int {
 
 // add address to observer
 func (s *parser) Subscribe(address string) bool {
-	err := s.addressRepo.Save(strings.ToLower(address))
+	err := s.addressRepo.Save(domain.NormalizeAddress(address))
 	if err != nil {
 		log.Errorf("failed to subscribe address '%s', error '%s'", address, err)
 		return false
@@ -57,7 +57,7 @@ func (s *parser) Subscribe(address string) bool {
 
 // list of inbound or outbound transactions for an address
 func (s *parser) GetTransactions(address string) []domain.Transaction {
-	txs, err := s.txRepo.FindByAddress(address)
+	txs, err := s.txRepo.FindByAddress(domain.NormalizeAddress(address))
 	if err != nil {
 		log.Errorf("failed to get transactions of address '%s', error '%s'", address, err)
 		return nil
@@ -131,6 +131,7 @@ func (s *parser) Start(ctx context.Context) {
 					log.Errorf("failed to update last parsed block '%d':'%s', error '%s'", lastBlock.Number, lastBlock.Hash, err)
 					continue
 				}
+				log.Infof("Parsed '%d -> %d' '%d' blocks, detect '%d' txs", fromBlock, toBlock, len(blocks), len(relatedTxs))
 			}
 		}
 	})
@@ -157,12 +158,7 @@ func (s *parser) isThereOrphanBlock(lastBlockNum int, lastBlockHash string, next
 func (s *parser) extractRelatedTxs(b domain.Block, result chan<- []domain.Transaction) {
 	txs := make([]domain.Transaction, 0)
 	for _, tx := range b.Transactions {
-		if s.addressRepo.Exist(strings.ToLower(tx.From)) {
-			tx.Direction = domain.Outgoing
-			txs = append(txs, tx)
-		}
-		if s.addressRepo.Exist(strings.ToLower(tx.To)) {
-			tx.Direction = domain.Incoming
+		if s.addressRepo.Exist(domain.NormalizeAddress(tx.From)) || s.addressRepo.Exist(domain.NormalizeAddress(tx.To)) {
 			txs = append(txs, tx)
 		}
 	}

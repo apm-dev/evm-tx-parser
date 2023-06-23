@@ -33,7 +33,7 @@ func (h *ParserHandler) GetLastParsedBlock(c echo.Context) error {
 
 func (h *ParserHandler) SubscribeAddress(c echo.Context) error {
 	var body echo.Map
-	err := c.Bind(body)
+	err := c.Bind(&body)
 	if err != nil {
 		log.Errorf("failed to subscribe for address, err: %s", err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "failed to subscribe for address"})
