@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  indexer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: evm_tx_parser
+    ports:
+      - 8000:8000
