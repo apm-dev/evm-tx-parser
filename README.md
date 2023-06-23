@@ -70,5 +70,5 @@ $ make stop
 ### 🛠 Tools Used:
 In this project, I use some tools listed below. But you can use any similar library that have the same purposes. But, well, different library will have different implementation type. Just be creative and use anything that you really need. 
 
-- All libraries listed in [`go.mod`](https://github.com/apm-dev/web3-api-proxy/blob/develop/go.mod)
+- All libraries listed in [`go.mod`](https://github.com/apm-dev/evm-tx-parser/blob/develop/go.mod)
 - ["github.com/vektra/mockery".](https://github.com/vektra/mockery) To Generate Mocks for testing needs.
