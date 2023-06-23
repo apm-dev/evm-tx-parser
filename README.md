@@ -1,4 +1,4 @@
-# Extensible Web3 API Proxy
+# Extensible Web3 Indexer
 
 ### ✅ This is a web3 Transaction Indexer (Block Parser) POC, it's designed to be completely extendable to:
 - Add other EVM chains
